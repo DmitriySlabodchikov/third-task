@@ -1,0 +1,140 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <title> Layout </title>
+  <script type="text/javascript" src="http://cdn.webix.com/edge/webix_debug.js"></script>
+  <link rel="stylesheet" type="text/css" href="http://cdn.webix.com/edge/webix.css">
+  <script type="text/javascript" src="testdata.js"></script>
+  <style type="text/css">
+	.grayBackground,.grayBackground .webix_list{
+		background-color: #F2F2F2;
+	}
+	.name{
+		font-size: 20px;
+		font-weight:bold;
+		padding-left:30px;
+	}
+	.status{
+		color: green;
+		text-align:center;
+	}
+	.line{
+		border-bottom: 1px solid #dedede;
+	}
+  </style>
+</head>
+<body>
+  <script type="text/javascript" charset="utf-8">
+  webix.ready(function(){
+		
+		var top = {
+			view:"toolbar",
+			cols:[
+				{view:"label", css:"name", label:"My App"},
+				{},
+				{view:"button", css:"profileButton", type:"icon", icon:"user", label:"Profile", autowidth:true}
+			]
+		};
+
+		var content = { 
+			view:"layout",
+			css:"line",
+			cols:[
+				{css:"grayBackground", rows:[ 
+				{ 	
+
+					view:"list",
+					id:"mylist",
+					autoheight:true,
+					scroll:false,
+					data:[ "Dashboard", "Users", "Products", "Locations" ]
+				},
+				{ },
+				{ view:"label", css:"status", label:"<span class='webix_icon fa-check'></span>connected"} 
+				], gravity: 0.3},
+			
+				{
+				view:"datatable",
+				id: "datatable",
+					columns:[
+						{ id:"title", header:"Title", width:280},
+						{ id:"year", header:"Year", width:100},
+						{ id:"votes", header:"Votes", width:100},
+						{ id:"rating", header:"Rating", width:100},
+						{ id:"rank", header:"Rank", width:100}
+					],
+					data:small_film_set
+				},
+				{	gravity: 0.7,
+					view: "form",
+					id: "form",
+						elements:[
+							{view:"template", template:"edit form", type:"section"},
+							{ view:"text", value:"Title<input>", name:"title", invalidMessage: "Not empty!", label:"Title"},
+							{ view:"text", value:"2017",name:"year", invalidMessage: "Enter year between 1970 and "+(new Date()).getFullYear(), label:"Year"},
+							{ view:"text", value:"5",name:"rating",invalidMessage: "number, greater than 0", label:"Rating"},
+							{ view:"text",value:"25", name:"votes",invalidMessage: "Must be less than 100000", label:"Votes"},
+							{ cols:[
+								{view:"button", value:"Add new", type:"form",
+									click: function() {
+										if ($$("form").validate()) {
+											//как-то так с элементами .innerHTML = "";
+										
+											var item = $$("form").getValues();
+
+											$$("datatable").add(item);
+											webix.message("Data entered correctly");
+											
+										}
+									}
+								},
+								{view:"button", value:"Clear",click: function() {
+									var titleInput = $$("form").elements.title;
+									  titleInput.setValue("");
+									  $$("form").clear();
+									  $$("form").clearValidation();
+									}
+								}
+							]},
+							{}
+						], 
+						rules:{
+							title: webix.rules.isNotEmpty,
+							year: function(value) {
+								return value > 1970 && value <= (new Date()).getFullYear();
+							  },
+							votes: webix.rules.isNotEmpty,
+							votes: function(value) {
+								return value > 0 && value < 100000;
+							},
+							rating: webix.rules.isNotEmpty,
+							rating: function(value) {
+								return value > 0;
+							}
+						}, 
+						on:{
+						  onValidationError: function(key, data) {
+							webix.message({
+								text: key + " field is incorrect",
+								type: "error"
+							});
+						  }
+						}
+					
+				}
+			]
+		};
+		
+		var bottom = { 
+			view:"label", align:"center", label:"The software is provided by <a href='https://webix.com/'>https://webix.com/</a>. All rights reserved ©."
+		}; 
+
+		webix.ui({
+			rows:[top,content,bottom]
+
+		});
+	});
+
+  </script>
+</body>
+</html>
